@@ -9,20 +9,20 @@ import (
 )
 
 func Auth() gin.HandlerFunc {
-	return gin.HandlerFunc(func(ctx *gin.Context) {
-		sessionToken, err := ctx.Cookie("session_token")
+	return func(c *gin.Context) {
+		sessionToken, err := c.Cookie("session_token")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				if ctx.GetHeader("Content-Type") == "application/json" {
-					ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+				if c.GetHeader("Content-Type") == "application/json" {
+					c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 				} else {
-					ctx.Redirect(http.StatusSeeOther, "/login")
+					c.Redirect(http.StatusSeeOther, "/login")
 				}
-				ctx.Abort()
+				c.Abort()
 				return
 			} else {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-				ctx.Abort()
+				c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+				c.Abort()
 				return
 			}
 		}
@@ -33,23 +33,35 @@ func Auth() gin.HandlerFunc {
 		})
 		if err != nil {
 			if err == jwt.ErrSignatureInvalid {
-				ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-				ctx.Abort()
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+				c.Abort()
 				return
 			}
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
-			ctx.Abort()
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Bad Request"})
+			c.Abort()
 			return
 		}
 		if !token.Valid {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			ctx.Abort()
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
 			return
 		}
 
-		ctx.Set("username", claims.Username)
+		c.Set("username", claims.Username)
+		c.Set("role", claims.Role)
 
-		ctx.Next()
-		// TODO: answer here
-	})
+		c.Next()
+	}
+}
+
+func AuthAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		role := c.GetString("role")
+		if role != "admin" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
 }

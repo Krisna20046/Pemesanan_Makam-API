@@ -11,6 +11,7 @@ import (
 type UserAPI interface {
 	Register(c *gin.Context)
 	Login(c *gin.Context)
+	GetUsersByRole(c *gin.Context)
 }
 
 type userAPI struct {
@@ -34,14 +35,19 @@ func (u *userAPI) Register(c *gin.Context) {
 		return
 	}
 
+	if user.Role == "" {
+		user.Role = "user"
+	}
+
 	var recordUser = model.User{
-		Nama:     user.Nama,
-		Username: user.Username,
-		Email:    user.Email,
-		Password: user.Password,
-		NoHP:     user.NoHP,
+		Nama:         user.Nama,
+		Role:         user.Role,
+		Username:     user.Username,
+		Email:        user.Email,
+		Password:     user.Password,
+		NoHP:         user.NoHP,
 		JenisKelamin: user.JenisKelamin,
-		Alamat: user.Alamat,
+		Alamat:       user.Alamat,
 	}
 
 	recordUser, err := u.userService.Register(&recordUser)
@@ -67,7 +73,7 @@ func (u *userAPI) Login(c *gin.Context) {
 	}
 
 	token, err := u.userService.Login(&model.User{
-		Username:    user.Username,
+		Username: user.Username,
 		Password: user.Password,
 	})
 	if err != nil {
@@ -81,5 +87,23 @@ func (u *userAPI) Login(c *gin.Context) {
 		"user_id": user.Username,
 		"message": "login success",
 	})
-	// TODO: answer here
+}
+
+func (u *userAPI) GetUsersByRole(c *gin.Context) {
+	// Pengecekan apakah pengguna yang melakukan permintaan memiliki role admin
+	if c.GetString("role") != "admin" {
+		c.JSON(http.StatusUnauthorized, model.NewErrorResponse("Only admin can perform this action"))
+		return
+	}
+
+	role := c.Param("role")
+	users, err := u.userService.GetUsersByRole(role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, model.NewErrorResponse("error internal server"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+	})
 }

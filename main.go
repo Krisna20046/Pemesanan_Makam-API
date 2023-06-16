@@ -24,6 +24,7 @@ type APIHandler struct {
 	UserAPIHandler     api.UserAPI
 	MakamAPIHandler		api.MakamAPI
 	JenazahAPIHandler		api.JenazahAPI
+
 }
 
 // type ClientHandler struct {
@@ -105,6 +106,7 @@ func RunServer(db *gorm.DB, gin *gin.Engine) *gin.Engine {
 		UserAPIHandler:     userAPIHandler,
 		MakamAPIHandler:		makamAPIHandler,
 		JenazahAPIHandler:		jenazahAPIHandler,
+
 	}
 
 	version := gin.Group("/api/v1")
@@ -130,6 +132,7 @@ func RunServer(db *gorm.DB, gin *gin.Engine) *gin.Engine {
 		jenazah := version.Group("/data-jenazah")
 		{
 			jenazah.Use(middleware.Auth())
+			jenazah.Use(middleware.AuthAdmin())
 			jenazah.POST("/add", apiHandler.JenazahAPIHandler.AddJenazah)
 			jenazah.GET("/get/:id", apiHandler.JenazahAPIHandler.GetJenazahByID)
 			jenazah.PUT("/update/:id", apiHandler.JenazahAPIHandler.UpdateJenazah)

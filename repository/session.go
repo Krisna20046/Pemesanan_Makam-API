@@ -14,6 +14,7 @@ type SessionRepository interface {
 	UpdateSessions(session model.Session) error
 	SessionAvailUsername(username string) (model.Session, error)
 	SessionAvailToken(token string) (model.Session, error)
+	GetSessionsByRole(role string) ([]model.Session, error)
 	TokenExpired(session model.Session) bool
 }
 
@@ -86,4 +87,17 @@ func (u *sessionsRepo) TokenValidity(token string) (model.Session, error) {
 
 func (u *sessionsRepo) TokenExpired(session model.Session) bool {
 	return session.Expiry.Before(time.Now())
+}
+
+func (s *sessionsRepo) GetSessionsByRole(role string) ([]model.Session, error) {
+	var sessions []model.Session
+	err := s.db.Where("role = ?", role).Find(&sessions).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return []model.Session{}, errors.New("sessions not found")
+		}
+		return []model.Session{}, err
+	}
+
+	return sessions, nil
 }

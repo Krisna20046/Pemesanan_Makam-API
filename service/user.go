@@ -12,6 +12,7 @@ import (
 type UserService interface {
 	Register(user *model.User) (model.User, error)
 	Login(user *model.User) (token *string, err error)
+	GetUsersByRole(role string) ([]model.User, error)
 }
 
 type userService struct {
@@ -22,6 +23,15 @@ type userService struct {
 func NewUserService(userRepository repo.UserRepository, sessionsRepo repo.SessionRepository) UserService {
 	return &userService{userRepository, sessionsRepo}
 }
+
+func (s *userService) GetUsersByRole(role string) ([]model.User, error) {
+	users, err := s.userRepo.GetUsersByRole(role)
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 
 func (s *userService) Register(user *model.User) (model.User, error) {
 	dbUser, err := s.userRepo.GetUserByUsername(user.Username)
@@ -59,7 +69,8 @@ func (s *userService) Login(user *model.User) (token *string, err error) {
 
 	expirationTime := time.Now().Add(20 * time.Minute)
 	claims := &model.Claims{
-		Username: dbUser.Username,
+		Username: user.Username,
+		Role:     dbUser.Role, // Set nilai peran (role) dari user yang ditemukan di database
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},
@@ -72,9 +83,9 @@ func (s *userService) Login(user *model.User) (token *string, err error) {
 	}
 
 	session := model.Session{
-		Token:  tokenString,
-		Username:  user.Username,
-		Expiry: expirationTime,
+		Token:    tokenString,
+		Username: user.Username,
+		Expiry:   expirationTime,
 	}
 
 	_, err = s.sessionsRepo.SessionAvailUsername(session.Username)
@@ -86,5 +97,6 @@ func (s *userService) Login(user *model.User) (token *string, err error) {
 
 	return &tokenString, nil
 }
+
 
 

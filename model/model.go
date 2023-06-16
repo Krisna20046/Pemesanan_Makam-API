@@ -5,6 +5,7 @@ import "time"
 type User struct {
 	ID           int       `gorm:"primaryKey" json:"id"`
 	Nama         string    `json:"nama"`
+	Role         string    `json:"role"`
 	Email        string    `json:"email"`
 	Username     string    `json:"username"`
 	Password     string    `json:"password"`
@@ -22,6 +23,7 @@ type UserLogin struct {
 
 type UserRegister struct {
 	Nama         string `json:"nama"`
+	Role         string `json:"role"`
 	Email        string `json:"email"`
 	Username     string `json:"username"`
 	Password     string `json:"password"`

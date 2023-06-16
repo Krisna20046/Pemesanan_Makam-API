@@ -9,6 +9,7 @@ import (
 type UserRepository interface {
 	GetUserByUsername(username string) (model.User, error)
 	CreateUser(user model.User) (model.User, error)
+	GetUsersByRole(role string) ([]model.User, error)
 }
 
 type userRepository struct {
@@ -31,6 +32,15 @@ func (r *userRepository) GetUserByUsername(username string) (model.User, error) 
 	return user, nil
 	 // TODO: replace this
 }
+func (r *userRepository) GetUsersByRole(role string) ([]model.User, error) {
+	var users []model.User
+	err := r.db.Where("role = ?", role).Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 
 func (r *userRepository) CreateUser(user model.User) (model.User, error) {
 	err := r.db.Create(&user).Error
