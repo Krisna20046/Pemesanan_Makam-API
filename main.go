@@ -21,10 +21,10 @@ import (
 )
 
 type APIHandler struct {
-	UserAPIHandler     api.UserAPI
-	MakamAPIHandler		api.MakamAPI
-	JenazahAPIHandler		api.JenazahAPI
-
+	UserAPIHandler      api.UserAPI
+	MakamAPIHandler     api.MakamAPI
+	JenazahAPIHandler   api.JenazahAPI
+	PemesananAPIHandler api.PemesananAPI
 }
 
 // type ClientHandler struct {
@@ -72,7 +72,7 @@ func main() {
 			panic(err)
 		}
 
-		conn.AutoMigrate(&model.User{}, &model.Session{}, &model.DataJenazah{}, &model.DataMakam{})
+		conn.AutoMigrate(&model.User{}, &model.Session{}, &model.DataJenazah{}, &model.DataMakam{}, &model.Pemesanan{})
 
 		router = RunServer(conn, router)
 		// router = RunClient(conn, router, Resources)
@@ -93,20 +93,23 @@ func RunServer(db *gorm.DB, gin *gin.Engine) *gin.Engine {
 	sessionRepo := repo.NewSessionsRepo(db)
 	makamRepo := repo.NewMakamRepo(db)
 	jenazahRepo := repo.NewJenazahRepo(db)
+	pemesananRepo := repo.NewPemesananRepo(db)
 
 	userService := service.NewUserService(userRepo, sessionRepo)
 	makamService := service.NewMakamService(makamRepo)
 	jenazahService := service.NewJenazahService(jenazahRepo)
+	pemesananService := service.NewPemesananService(pemesananRepo)
 
 	userAPIHandler := api.NewUserAPI(userService)
 	makamAPIHandler := api.NewMakamAPI(makamService)
 	jenazahAPIHandler := api.NewJenazahAPI(jenazahService)
+	pemesananAPIHandler := api.NewPemesananAPI(pemesananService)
 
 	apiHandler := APIHandler{
-		UserAPIHandler:     userAPIHandler,
-		MakamAPIHandler:		makamAPIHandler,
-		JenazahAPIHandler:		jenazahAPIHandler,
-
+		UserAPIHandler:      userAPIHandler,
+		MakamAPIHandler:     makamAPIHandler,
+		JenazahAPIHandler:   jenazahAPIHandler,
+		PemesananAPIHandler: pemesananAPIHandler,
 	}
 
 	version := gin.Group("/api/v1")
@@ -115,29 +118,41 @@ func RunServer(db *gorm.DB, gin *gin.Engine) *gin.Engine {
 		{
 			user.POST("/login", apiHandler.UserAPIHandler.Login)
 			user.POST("/register", apiHandler.UserAPIHandler.Register)
-
 			user.Use(middleware.Auth())
+
+			pemesanan := user.Group("/pemesanan")
+			{
+				
+				pemesanan.POST("/add", apiHandler.PemesananAPIHandler.AddPemesanan)
+				pemesanan.GET("/get/:id", apiHandler.PemesananAPIHandler.GetPemesananByID)
+				pemesanan.PUT("/update/:id", apiHandler.PemesananAPIHandler.UpdatePemesanan)
+				pemesanan.DELETE("/delete/:id", apiHandler.PemesananAPIHandler.DeletePemesanan)
+				pemesanan.GET("/list", apiHandler.PemesananAPIHandler.GetPemesananList)
+			}
 		}
 
-		makam := version.Group("/data-makam")
+		admin := version.Group("/admin")
 		{
-			makam.Use(middleware.Auth())
-			makam.POST("/add", apiHandler.MakamAPIHandler.AddMakam)
-			makam.GET("/get/:id", apiHandler.MakamAPIHandler.GetMakamByID)
-			makam.PUT("/update/:id", apiHandler.MakamAPIHandler.UpdateMakam)
-			makam.DELETE("/delete/:id", apiHandler.MakamAPIHandler.DeleteMakam)
-			makam.GET("/list", apiHandler.MakamAPIHandler.GetMakamList)
-		}
+			admin.Use(middleware.Auth())
+			admin.Use(middleware.AuthAdmin())
+			admin.POST("/register", apiHandler.UserAPIHandler.Register)
 
-		jenazah := version.Group("/data-jenazah")
-		{
-			jenazah.Use(middleware.Auth())
-			jenazah.Use(middleware.AuthAdmin())
-			jenazah.POST("/add", apiHandler.JenazahAPIHandler.AddJenazah)
-			jenazah.GET("/get/:id", apiHandler.JenazahAPIHandler.GetJenazahByID)
-			jenazah.PUT("/update/:id", apiHandler.JenazahAPIHandler.UpdateJenazah)
-			jenazah.DELETE("/delete/:id", apiHandler.JenazahAPIHandler.DeleteJenazah)
-			jenazah.GET("/list", apiHandler.JenazahAPIHandler.GetJenazahList)
+			jenazah := admin.Group("/data-jenazah")
+			{
+				jenazah.POST("/add", apiHandler.JenazahAPIHandler.AddJenazah)
+				jenazah.GET("/get/:id", apiHandler.JenazahAPIHandler.GetJenazahByID)
+				jenazah.PUT("/update/:id", apiHandler.JenazahAPIHandler.UpdateJenazah)
+				jenazah.DELETE("/delete/:id", apiHandler.JenazahAPIHandler.DeleteJenazah)
+				jenazah.GET("/list", apiHandler.JenazahAPIHandler.GetJenazahList)
+			}
+			makam := admin.Group("/data-makam")
+			{
+				makam.POST("/add", apiHandler.MakamAPIHandler.AddMakam)
+				makam.GET("/get/:id", apiHandler.MakamAPIHandler.GetMakamByID)
+				makam.PUT("/update/:id", apiHandler.MakamAPIHandler.UpdateMakam)
+				makam.DELETE("/delete/:id", apiHandler.MakamAPIHandler.DeleteMakam)
+				makam.GET("/list", apiHandler.MakamAPIHandler.GetMakamList)
+			}
 		}
 	}
 
