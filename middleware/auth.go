@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"github.com/Krisna20046/model"
 	"net/http"
+
+	"github.com/Krisna20046/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"

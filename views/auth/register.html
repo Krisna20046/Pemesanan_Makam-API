@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "general/header"}}
+</head>
+
+<body>
+    <!-- beginanswer -->
+    <div class="flex items-center justify-center min-h-screen bg-cover"
+        style="background-image: url('https://img.freepik.com/free-photo/autumn-leaves-fall-tombstones-forest-generated-by-ai_188544-40659.jpg?w=900&t=st=1686997395~exp=1686997995~hmac=1c09c63bb0780f7bab3fe7dc4b7114e563c9bb322cf77db5acbab4b8a2b8fb99');">
+        <div class="w-full max-w-md px-8 py-10 mt-4 text-left bg-white shadow-lg rounded-lg bg-opacity-80">
+            <h3 class="text-2xl font-bold text-center">Register account</h3>
+            <form method="POST" action="/client/register/process">
+                <div>
+                    <div class="mt-4">
+                        <div>
+                            <label class="block" for="nama">nama<label>
+                                    <input type="nama" placeholder="nama"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="nama">
+                        </div>
+                        <div class="mt-4">
+                            <label class="block" for="email">email<label>
+                                    <input type="email" placeholder="email"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="email">
+                        </div>
+                        <div class="mt-4">
+                            <label class="block">username<label>
+                                    <input type="username" placeholder="username"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="username">
+                        </div>
+                        <div class="mt-4">
+                            <label class="block">Password<label>
+                                    <input type="password" placeholder="Password"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="password">
+                        </div>
+                        <div class="mt-4">
+                            <label class="block">Nomor Telp<label>
+                                    <input type="no_hp" placeholder="No"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="no_hp">
+                        </div>
+                        <div class="mt-4">
+                            <label class="block">Jenis Kelamin<label>
+                                    <input type="jenis_kelamin" placeholder="Jenis Kelamin"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="jenis_kelamin">
+                        </div>
+                        <div class="mt-4">
+                            <label class="block">Alamat<label>
+                                    <input type="alamat" placeholder="Alamat"
+                                        class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"
+                                        name="alamat">
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <button
+                                class="px-6 py-2 mt-4 text-white bg-blue-600 rounded-lg hover:bg-blue-900">Register</button>
+                            <a href="/client/login" class="text-sm text-blue-600 hover:underline">Login</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- endanswer -->
+</body>
+
+</html>

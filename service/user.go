@@ -1,10 +1,11 @@
 package service
 
 import (
-	"github.com/Krisna20046/model"
-	repo "github.com/Krisna20046/repository"
 	"errors"
 	"time"
+
+	"github.com/Krisna20046/model"
+	repo "github.com/Krisna20046/repository"
 
 	"github.com/golang-jwt/jwt"
 )
@@ -31,7 +32,6 @@ func (s *userService) GetUsersByRole(role string) ([]model.User, error) {
 	}
 	return users, nil
 }
-
 
 func (s *userService) Register(user *model.User) (model.User, error) {
 	dbUser, err := s.userRepo.GetUserByUsername(user.Username)
@@ -97,6 +97,3 @@ func (s *userService) Login(user *model.User) (token *string, err error) {
 
 	return &tokenString, nil
 }
-
-
-

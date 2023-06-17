@@ -23,13 +23,13 @@ func (c *sessionService) GetSessionByUsername(username string) (model.Session, e
 		return model.Session{}, err
 	}
 	return session, nil
-	 // TODO: replace this
+	// TODO: replace this
 }
 
 func (s *sessionService) GetSessionsByRole(role string) ([]model.Session, error) {
 	sessions, err := s.sessionRepo.GetSessionsByRole(role)
 	if err != nil {
-	return []model.Session{}, err
+		return []model.Session{}, err
 	}
 	return sessions, nil
-	}
+}

@@ -1,20 +1,24 @@
 package main
 
 import (
-	// "embed"
+	"embed"
 	"fmt"
-	// "net/http"
+
+	"net/http"
 	"sync"
 	"time"
 
 	_ "embed"
 
+	"github.com/Krisna20046/client"
 	"github.com/Krisna20046/db"
 	"github.com/Krisna20046/handler/api"
+	"github.com/Krisna20046/handler/web"
 	"github.com/Krisna20046/middleware"
 	"github.com/Krisna20046/model"
 	repo "github.com/Krisna20046/repository"
 	service "github.com/Krisna20046/service"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"gorm.io/gorm"
@@ -27,15 +31,15 @@ type APIHandler struct {
 	PemesananAPIHandler api.PemesananAPI
 }
 
-// type ClientHandler struct {
-// 	AuthWeb      web.AuthWeb
-// 	HomeWeb      web.HomeWeb
-// 	DashboardWeb web.DashboardWeb
-// 	ModalWeb     web.ModalWeb
-// }
+type ClientHandler struct {
+	AuthWeb web.AuthWeb
+	HomeWeb web.HomeWeb
+	// DashboardWeb web.DashboardWeb
+	// ModalWeb     web.ModalWeb
+}
 
-//go..:embed views/*
-// var Resources embed.FS
+//go:embed views/*
+var Resources embed.FS
 
 func main() {
 	gin.SetMode(gin.ReleaseMode) //release
@@ -75,7 +79,7 @@ func main() {
 		conn.AutoMigrate(&model.User{}, &model.Session{}, &model.DataJenazah{}, &model.DataMakam{}, &model.Pemesanan{})
 
 		router = RunServer(conn, router)
-		// router = RunClient(conn, router, Resources)
+		router = RunClient(conn, router, Resources)
 
 		fmt.Println("Server is running on localhost:8080")
 		err = router.Run(":8080")
@@ -122,7 +126,7 @@ func RunServer(db *gorm.DB, gin *gin.Engine) *gin.Engine {
 
 			pemesanan := user.Group("/pemesanan")
 			{
-				
+
 				pemesanan.POST("/add", apiHandler.PemesananAPIHandler.AddPemesanan)
 				pemesanan.GET("/get/:id", apiHandler.PemesananAPIHandler.GetPemesananByID)
 				pemesanan.PUT("/update/:id", apiHandler.PemesananAPIHandler.UpdatePemesanan)
@@ -159,50 +163,45 @@ func RunServer(db *gorm.DB, gin *gin.Engine) *gin.Engine {
 	return gin
 }
 
-// func RunClient(db *gorm.DB, gin *gin.Engine, embed embed.FS) *gin.Engine {
-// 	sessionRepo := repo.NewSessionsRepo(db)
-// 	sessionService := service.NewSessionService(sessionRepo)
+func RunClient(db *gorm.DB, gin *gin.Engine, embed embed.FS) *gin.Engine {
+	sessionRepo := repo.NewSessionsRepo(db)
+	sessionService := service.NewSessionService(sessionRepo)
 
-// 	userClient := client.NewUserClient()
+	userClient := client.NewUserClient()
 
-// 	authWeb := web.NewAuthWeb(userClient, sessionService, embed)
-// 	modalWeb := web.NewModalWeb(embed)
-// 	homeWeb := web.NewHomeWeb(embed)
-// 	dashboardWeb := web.NewDashboardWeb(userClient, sessionService, embed)
+	authWeb := web.NewAuthWeb(userClient, sessionService, embed)
+	// modalWeb := web.NewModalWeb(embed)
+	homeWeb := web.NewHomeWeb(embed)
+	// dashboardWeb := web.NewDashboardWeb(userClient, sessionService, embed)
 
-// 	client := ClientHandler{
-// 		authWeb, homeWeb, dashboardWeb, modalWeb,
-// 	}
+	client := ClientHandler{
+		authWeb, homeWeb,
+	}
 
-// 	gin.StaticFS("/static", http.Dir("frontend/public"))
+	gin.StaticFS("/static", http.Dir("frontend/public"))
 
-// 	gin.GET("/", client.HomeWeb.Index)
+	gin.GET("/", client.HomeWeb.Index)
 
-// 	user := gin.Group("/client")
-// 	{
-// 		user.GET("/login", client.AuthWeb.Login)
-// 		user.POST("/login/process", client.AuthWeb.LoginProcess)
-// 		user.GET("/register", client.AuthWeb.Register)
-// 		user.POST("/register/process", client.AuthWeb.RegisterProcess)
+	user := gin.Group("/client")
+	{
+		user.GET("/login", client.AuthWeb.Login)
+		user.POST("/login/process", client.AuthWeb.LoginProcess)
+		user.GET("/register", client.AuthWeb.Register)
+		user.POST("/register/process", client.AuthWeb.RegisterProcess)
 
-// 		user.Use(middleware.Auth())
-// 		user.GET("/logout", client.AuthWeb.Logout)
-// 	}
+		user.Use(middleware.Auth())
+		user.GET("/logout", client.AuthWeb.Logout)
+	}
 
-// 	main := gin.Group("/client")
-// 	{
-// 		main.Use(middleware.Auth())
-// 		main.GET("/dashboard", client.DashboardWeb.Dashboard)
-// 		main.GET("/task", client.TaskWeb.TaskPage)
-// 		user.POST("/task/add/process", client.TaskWeb.TaskAddProcess)
-// 		user.POST("/category/add/process", client.CategoryWeb.CategoryAddProcess)
-// 		main.GET("/category", client.CategoryWeb.CategoryPage)
-// 	}
+	main := gin.Group("/client")
+	{
+		main.Use(middleware.Auth())
+		// main.GET("/dashboard", client.DashboardWeb.Dashboard)
+		// main.GET("/task", client.TaskWeb.TaskPage)
+		// user.POST("/task/add/process", client.TaskWeb.TaskAddProcess)
+		// user.POST("/category/add/process", client.CategoryWeb.CategoryAddProcess)
+		// main.GET("/category", client.CategoryWeb.CategoryPage)
+	}
 
-// 	modal := gin.Group("/client")
-// 	{
-// 		modal.GET("/modal", client.ModalWeb.Modal)
-// 	}
-
-// 	return gin
-// }
+	return gin
+}

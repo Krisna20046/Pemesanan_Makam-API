@@ -1,9 +1,10 @@
 package repository
 
 import (
-	"github.com/Krisna20046/model"
 	"errors"
 	"time"
+
+	"github.com/Krisna20046/model"
 
 	"gorm.io/gorm"
 )
@@ -38,7 +39,7 @@ func (u *sessionsRepo) DeleteSession(token string) error {
 
 func (u *sessionsRepo) UpdateSessions(session model.Session) error {
 	err := u.db.Model(&model.Session{}).Where("username = ?", session.Username).Updates(session).Error
-	return err 
+	return err
 	// TODO: replace this
 }
 

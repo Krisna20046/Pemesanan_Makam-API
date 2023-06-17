@@ -1,10 +1,11 @@
 package api
 
 import (
-	"github.com/Krisna20046/model"
-	"github.com/Krisna20046/service"
 	"net/http"
 	"strconv"
+
+	"github.com/Krisna20046/model"
+	"github.com/Krisna20046/service"
 
 	"github.com/gin-gonic/gin"
 )

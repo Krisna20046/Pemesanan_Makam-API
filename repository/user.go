@@ -30,7 +30,7 @@ func (r *userRepository) GetUserByUsername(username string) (model.User, error) 
 		return model.User{}, err // Mengembalikan error jika terjadi kesalahan lain
 	}
 	return user, nil
-	 // TODO: replace this
+	// TODO: replace this
 }
 func (r *userRepository) GetUsersByRole(role string) ([]model.User, error) {
 	var users []model.User
@@ -40,7 +40,6 @@ func (r *userRepository) GetUsersByRole(role string) ([]model.User, error) {
 	}
 	return users, nil
 }
-
 
 func (r *userRepository) CreateUser(user model.User) (model.User, error) {
 	err := r.db.Create(&user).Error

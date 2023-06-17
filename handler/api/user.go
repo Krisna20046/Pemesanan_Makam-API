@@ -1,9 +1,10 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/Krisna20046/model"
 	"github.com/Krisna20046/service"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
